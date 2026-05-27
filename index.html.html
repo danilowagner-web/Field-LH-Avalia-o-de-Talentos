@@ -498,7 +498,7 @@ var S = {
   pdca: { plan:'', do_:'', check:'', act:'' },
   // login temp
   _gesNome: null, _gesId: null,
-  _anaMat: null, _anaUser: null, adm: null
+  _anaMat: null, _anaUser: null
 };
 
 function ini(n) {
@@ -844,8 +844,6 @@ async function anaCriarSenha() {
     await dbPatch('usuarios', 'matricula=eq.' + S._anaMat, { senha: s1, status: 'ativo', tentativas: 0 });
     showLoad('Carregando painel...');
     await loadAnalista(S._anaMat, S._anaUser.gestor_id);
-    var admRows2 = await dbGet('time_membros', 'matricula=eq.' + S._anaMat + '&select=adm');
-    S.adm = admRows2 && admRows2.length && admRows2[0].adm ? admRows2[0].adm : null;
     hideLoad();
     entrar(S._anaMat, S._anaUser.nome || S._anaMat, 'analista');
   } catch(e) {
@@ -875,8 +873,6 @@ async function anaLogin() {
     showLoad('Carregando painel...');
     await loadAnalista(mat, user.gestor_id);
     // Busca data de admissão do analista em time_membros
-    var admRows = await dbGet('time_membros', 'matricula=eq.' + mat + '&select=adm');
-    S.adm = admRows && admRows.length && admRows[0].adm ? admRows[0].adm : null;
     hideLoad();
     entrar(mat, user.nome || mat, 'analista');
   } catch(e) {
@@ -907,7 +903,7 @@ function entrar(mat, nome, role) {
 }
 
 function sair() {
-  S = { role:null,user:null,nome:null,selPeriod:(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-Mensal';})(),selMember:null,selBox:'Excedente',pendingEnvio:null,surveyMes:null,time:[],gestores:[],recados:[],projetos:[],iniciativas:[],autoav:{},survey:{},ishi:{problema:'',metodo:'',maquina:'',material:'',maodeobra:'',meioambiente:'',medida:''},porques:['','','','',''],pdca:{plan:'',do_:'',check:'',act:''},_gesNome:null,_gesId:null,_anaMat:null,_anaUser:null,adm:null };
+  S = { role:null,user:null,nome:null,selPeriod:(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-Mensal';})(),selMember:null,selBox:'Excedente',pendingEnvio:null,surveyMes:null,time:[],gestores:[],recados:[],projetos:[],iniciativas:[],autoav:{},survey:{},ishi:{problema:'',metodo:'',maquina:'',material:'',maodeobra:'',meioambiente:'',medida:''},porques:['','','','',''],pdca:{plan:'',do_:'',check:'',act:''},_gesNome:null,_gesId:null,_anaMat:null,_anaUser:null };
   document.getElementById('PAGE-APP').style.display = 'none';
   document.getElementById('PAGE-LOGIN').style.display = 'flex';
   // Reset forms
@@ -1085,38 +1081,15 @@ function ensureAv(mid) {
 var NCOR  = ['#9E9E9E','#66BB6A','#FFD600','#FF7043','#5C6BC0'];
 var NNOME = ['Cedo para avaliar','Básico','Intermediário','Avançado','Referência'];
 
-// Retorna true se membro tem menos de 100 dias de casa
-function isCedo(mid) {
-  var adm;
-  if (parseInt(mid) === 0) {
-    adm = S.adm;
-  } else {
-    var m = S.time.find(function(x){ return x.id === parseInt(mid); });
-    adm = m ? m.adm : null;
-  }
-  if (!adm || adm === '' || adm === 'null') return false;
-  // Compara só datas, ignorando fuso horário
-  var parts = String(adm).split('-');
-  if (parts.length < 3) return false;
-  var dAdm = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-  if (isNaN(dAdm.getTime())) return false;
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var dias = Math.floor((hoje - dAdm) / (1000*60*60*24));
-  return dias < 100;
-}
-
-// Renderiza select de skill igual ao DNA
+// Renderiza select de skill
 function renderDots(mid, sid, cur, isG) {
   cur = parseInt(cur) || 0;
-  var cedo = isCedo(mid);
-  if (cedo) cur = 0;
   var fn = isG ? 'skSet(' + mid + ',"' + sid + '",parseInt(this.value))' : 'autoSkSet("' + sid + '",parseInt(this.value))';
-  var html = '<select style="width:auto;font-size:11px;padding:4px 8px"' + (cedo ? ' disabled' : '') + ' onchange="' + fn + '">';
+  var html = '<select style="width:auto;font-size:11px;padding:4px 8px" onchange="' + fn + '">';
   for (var v = 0; v <= 4; v++) {
     html += '<option value="' + v + '"' + (v === cur ? ' selected' : '') + '>' + NNOME[v] + '</option>';
   }
   html += '</select>';
-  if (cedo) html += ' <span style="font-size:10px;color:#9E9E9E">🔒 &lt;100 dias</span>';
   return html;
 }
 
@@ -1167,27 +1140,6 @@ function updateScoreLive(mid) {
 }
 
 
-function updateScoreLive(mid){
-  var m = S.time.find(function(x){ return x.id===mid; });
-  if(!m) return;
-  var sc = calcScore(m, S.selPeriod);
-  if(!sc) return;
-  var el = document.getElementById('score-live');
-  if(!el) return;
-  var cor = sc.final>=80?'var(--gr)':sc.final>=60?'var(--n)':'var(--rd)';
-  el.innerHTML =
-    '<div style="text-align:center">'
-    +'<div style="font-size:34px;font-weight:700;color:'+cor+'">'+sc.final+'%</div>'
-    +'<div style="font-size:11px;color:var(--ts)">Score final</div></div>'
-    +'<div style="flex:1;min-width:160px">'
-    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.4rem">'
-    +'<span class="badge '+bbadge(sc.box)+'">'+sc.box+'</span>'
-    +'<span class="badge b-gr">'+sc.qual+'</span>'
-    +(m.avaliacoes[S.selPeriod]&&m.avaliacoes[S.selPeriod].lancada?'<span class="badge b-g">✓ Enviado</span>':'<span class="badge b-a">Rascunho</span>')
-    +'</div>'
-    +'<div style="font-size:11px;color:var(--ts)">Pot: <b>'+sc.pot+'%</b> · Pen: <b style="color:var(--rd)">-'+sc.pen+'pts</b> · KPIs: <b>'+sc.kpiScore+'%</b> · Pres: <b>'+sc.presScore+'%</b></div>'
-    +'</div>';
-}
 
 async function saveAv(mid, period) {
   var m = S.time.find(function(x){ return x.id===mid; });
