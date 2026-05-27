@@ -1089,14 +1089,15 @@ var NNOME = ['Cedo para avaliar','Básico','Intermediário','Avançado','Referê
 function isCedo(mid) {
   var adm;
   if (parseInt(mid) === 0) {
-    // analista (auto-avaliação)
     adm = S.adm;
   } else {
     var m = S.time.find(function(x){ return x.id === parseInt(mid); });
     adm = m ? m.adm : null;
   }
-  if (!adm) return false;
-  var dias = Math.floor((new Date() - new Date(adm)) / (1000*60*60*24));
+  if (!adm || adm === '' || adm === 'null') return false;
+  var d = new Date(adm);
+  if (isNaN(d.getTime())) return false;
+  var dias = Math.floor((new Date() - d) / (1000*60*60*24));
   return dias < 100;
 }
 
@@ -1109,21 +1110,24 @@ function renderDots(mid, sid, cur, isG) {
   for (var v = 0; v <= 4; v++) {
     var sel = (v === cur);
     var bloq = cedo && v > 0;
-    var fn  = bloq ? '' : (isG ? 'skSet(' + mid + ',"' + sid + '",' + v + ')' : 'autoSkSet("' + sid + '",' + v + ')');
-    var bg  = sel ? NCOR[v] : '#EEEEEE';
-    var bdr = sel ? NCOR[v] : '#BDBDBD';
-    var shd = sel ? 'box-shadow:0 0 0 3px ' + NCOR[v] + '55;transform:scale(1.25);' : '';
-    var sz  = v === 0 ? '14px' : '18px';
+    // Função de clique
+    var fn = isG ? 'skSet(' + mid + ',"' + sid + '",' + v + ')' : 'autoSkSet("' + sid + '",' + v + ')';
+    // Cores: selecionado = cor do nível, outros = cinza
+    var bg  = sel ? NCOR[v] : '#DDDDDD';
+    var bdr = sel ? NCOR[v] : '#BBBBBB';
+    var shd = sel ? 'box-shadow:0 0 0 3px ' + NCOR[v] + '44;transform:scale(1.2);' : '';
+    var sz  = '18px';
     var cur2 = bloq ? 'not-allowed' : 'pointer';
-    var opa = bloq ? 'opacity:.3;' : '';
+    var opa = bloq ? 'opacity:.25;' : '';
     html += '<div style="width:'+sz+';height:'+sz+';border-radius:50%;border:2px solid ' + bdr
           + ';background:' + bg + ';' + shd + opa + 'cursor:' + cur2 + ';flex-shrink:0;transition:all .15s"'
-          + (fn ? ' onclick="' + fn + '"' : '')
-          + ' title="' + (bloq ? 'Cedo para avaliar (menos de 100 dias)' : NNOME[v]) + '"></div>';
+          + (!bloq ? ' onclick="' + fn + '"' : '')
+          + ' title="' + NNOME[v] + '"></div>';
   }
   html += '</div>';
-  var cor = NCOR[cur];
-  html += '<div style="font-size:11px;font-weight:700;color:' + cor + ';min-width:120px">' + NNOME[cur] + (cedo ? ' 🔒' : '') + '</div>';
+  var cor = sel ? NCOR[cur] : NCOR[cur];
+  html += '<div style="font-size:11px;font-weight:600;color:' + NCOR[cur] + ';min-width:130px;margin-left:4px">'
+        + NNOME[cur] + (cedo ? ' 🔒' : '') + '</div>';
   return html;
 }
 
