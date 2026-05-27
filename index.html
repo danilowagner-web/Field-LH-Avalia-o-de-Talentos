@@ -1134,10 +1134,7 @@ function skSet(mid, sid, val) {
     m.avaliacoes[S.selPeriod] = {skills:{},dna:{},kpis:{},pres:{presencialidade:3,phishing:3,conectividade:3},entregas:'',fortes:'',dev:'',passos:'',carreira:'',turnover:'baixo',lancada:false};
   }
   m.avaliacoes[S.selPeriod].skills[sid] = val;
-  // Atualizar visual in-place
-  var wrap = document.querySelector('[data-mid="'+mid+'"][data-sid="'+sid+'"]');
-  if (wrap) wrap.innerHTML = renderDots(mid, sid, val, true);
-  // Atualizar score
+  // Não rerender o select — só atualiza o score
   updateScoreLive(mid);
 }
 
@@ -1145,8 +1142,7 @@ function skSet(mid, sid, val) {
 function autoSkSet(sid, val) {
   val = parseInt(val);
   S.autoav['sk_' + sid] = val;
-  var wrap = document.querySelector('[data-mid="0"][data-sid="'+sid+'"]');
-  if (wrap) wrap.innerHTML = renderDots(0, sid, val, false);
+  // Não rerender — select já mostra o valor selecionado nativamente
 }
 
 // Atualizar score no topo da página de avaliação
