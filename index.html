@@ -1105,33 +1105,18 @@ function isCedo(mid) {
   return dias < 100;
 }
 
-// Renderiza 5 dots (0=Cedo para avaliar, 1-4=níveis) — só o selecionado fica aceso
+// Renderiza select de skill igual ao DNA
 function renderDots(mid, sid, cur, isG) {
   cur = parseInt(cur) || 0;
   var cedo = isCedo(mid);
   if (cedo) cur = 0;
-  var html = '<div style="display:flex;align-items:center;gap:5px">';
+  var fn = isG ? 'skSet(' + mid + ',"' + sid + '",parseInt(this.value))' : 'autoSkSet("' + sid + '",parseInt(this.value))';
+  var html = '<select style="width:auto;font-size:11px;padding:4px 8px"' + (cedo ? ' disabled' : '') + ' onchange="' + fn + '">';
   for (var v = 0; v <= 4; v++) {
-    var sel = (v === cur);
-    var bloq = cedo && v > 0;
-    // Função de clique
-    var fn = isG ? 'skSet(' + mid + ',"' + sid + '",' + v + ')' : 'autoSkSet("' + sid + '",' + v + ')';
-    // Cores: selecionado = cor do nível, outros = cinza
-    var bg  = sel ? NCOR[v] : '#DDDDDD';
-    var bdr = sel ? NCOR[v] : '#BBBBBB';
-    var shd = sel ? 'box-shadow:0 0 0 3px ' + NCOR[v] + '44;transform:scale(1.2);' : '';
-    var sz  = '18px';
-    var cur2 = bloq ? 'not-allowed' : 'pointer';
-    var opa = bloq ? 'opacity:.25;' : '';
-    html += '<div style="width:'+sz+';height:'+sz+';border-radius:50%;border:2px solid ' + bdr
-          + ';background:' + bg + ';' + shd + opa + 'cursor:' + cur2 + ';flex-shrink:0;transition:all .15s"'
-          + (!bloq ? ' onclick="' + fn + '"' : '')
-          + ' title="' + NNOME[v] + '"></div>';
+    html += '<option value="' + v + '"' + (v === cur ? ' selected' : '') + '>' + NNOME[v] + '</option>';
   }
-  html += '</div>';
-  var cor = sel ? NCOR[cur] : NCOR[cur];
-  html += '<div style="font-size:11px;font-weight:600;color:' + NCOR[cur] + ';min-width:130px;margin-left:4px">'
-        + NNOME[cur] + (cedo ? ' 🔒' : '') + '</div>';
+  html += '</select>';
+  if (cedo) html += ' <span style="font-size:10px;color:#9E9E9E">🔒 &lt;100 dias</span>';
   return html;
 }
 
