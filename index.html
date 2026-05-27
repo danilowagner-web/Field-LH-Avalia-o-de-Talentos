@@ -498,7 +498,7 @@ var S = {
   pdca: { plan:'', do_:'', check:'', act:'' },
   // login temp
   _gesNome: null, _gesId: null,
-  _anaMat: null, _anaUser: null
+  _anaMat: null, _anaUser: null, adm: null
 };
 
 function ini(n) {
@@ -844,6 +844,8 @@ async function anaCriarSenha() {
     await dbPatch('usuarios', 'matricula=eq.' + S._anaMat, { senha: s1, status: 'ativo', tentativas: 0 });
     showLoad('Carregando painel...');
     await loadAnalista(S._anaMat, S._anaUser.gestor_id);
+    var admRows2 = await dbGet('time_membros', 'matricula=eq.' + S._anaMat + '&select=adm');
+    S.adm = admRows2 && admRows2.length && admRows2[0].adm ? admRows2[0].adm : null;
     hideLoad();
     entrar(S._anaMat, S._anaUser.nome || S._anaMat, 'analista');
   } catch(e) {
@@ -872,6 +874,9 @@ async function anaLogin() {
     await dbPatch('usuarios', 'matricula=eq.' + mat, { tentativas: 0 });
     showLoad('Carregando painel...');
     await loadAnalista(mat, user.gestor_id);
+    // Busca data de admissão do analista em time_membros
+    var admRows = await dbGet('time_membros', 'matricula=eq.' + mat + '&select=adm');
+    S.adm = admRows && admRows.length && admRows[0].adm ? admRows[0].adm : null;
     hideLoad();
     entrar(mat, user.nome || mat, 'analista');
   } catch(e) {
@@ -902,7 +907,7 @@ function entrar(mat, nome, role) {
 }
 
 function sair() {
-  S = { role:null,user:null,nome:null,selPeriod:(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-Mensal';})(),selMember:null,selBox:'Excedente',pendingEnvio:null,surveyMes:null,time:[],gestores:[],recados:[],projetos:[],iniciativas:[],autoav:{},survey:{},ishi:{problema:'',metodo:'',maquina:'',material:'',maodeobra:'',meioambiente:'',medida:''},porques:['','','','',''],pdca:{plan:'',do_:'',check:'',act:''},_gesNome:null,_gesId:null,_anaMat:null,_anaUser:null };
+  S = { role:null,user:null,nome:null,selPeriod:(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-Mensal';})(),selMember:null,selBox:'Excedente',pendingEnvio:null,surveyMes:null,time:[],gestores:[],recados:[],projetos:[],iniciativas:[],autoav:{},survey:{},ishi:{problema:'',metodo:'',maquina:'',material:'',maodeobra:'',meioambiente:'',medida:''},porques:['','','','',''],pdca:{plan:'',do_:'',check:'',act:''},_gesNome:null,_gesId:null,_anaMat:null,_anaUser:null,adm:null };
   document.getElementById('PAGE-APP').style.display = 'none';
   document.getElementById('PAGE-LOGIN').style.display = 'flex';
   // Reset forms
@@ -1080,24 +1085,45 @@ function ensureAv(mid) {
 var NCOR  = ['#9E9E9E','#66BB6A','#FFD600','#FF7043','#5C6BC0'];
 var NNOME = ['Cedo para avaliar','Básico','Intermediário','Avançado','Referência'];
 
+// Retorna true se membro tem menos de 100 dias de casa
+function isCedo(mid) {
+  var adm;
+  if (parseInt(mid) === 0) {
+    // analista (auto-avaliação)
+    adm = S.adm;
+  } else {
+    var m = S.time.find(function(x){ return x.id === parseInt(mid); });
+    adm = m ? m.adm : null;
+  }
+  if (!adm) return false;
+  var dias = Math.floor((new Date() - new Date(adm)) / (1000*60*60*24));
+  return dias < 100;
+}
+
 // Renderiza 5 dots (0=Cedo para avaliar, 1-4=níveis) — só o selecionado fica aceso
 function renderDots(mid, sid, cur, isG) {
   cur = parseInt(cur) || 0;
+  var cedo = isCedo(mid);
+  if (cedo) cur = 0;
   var html = '<div style="display:flex;align-items:center;gap:5px">';
   for (var v = 0; v <= 4; v++) {
     var sel = (v === cur);
-    var fn  = isG ? 'skSet(' + mid + ',"' + sid + '",' + v + ')' : 'autoSkSet("' + sid + '",' + v + ')';
+    var bloq = cedo && v > 0;
+    var fn  = bloq ? '' : (isG ? 'skSet(' + mid + ',"' + sid + '",' + v + ')' : 'autoSkSet("' + sid + '",' + v + ')');
     var bg  = sel ? NCOR[v] : '#EEEEEE';
     var bdr = sel ? NCOR[v] : '#BDBDBD';
     var shd = sel ? 'box-shadow:0 0 0 3px ' + NCOR[v] + '55;transform:scale(1.25);' : '';
-    var sz  = v === 0 ? '14px' : '18px'; // dot 0 menor
+    var sz  = v === 0 ? '14px' : '18px';
+    var cur2 = bloq ? 'not-allowed' : 'pointer';
+    var opa = bloq ? 'opacity:.3;' : '';
     html += '<div style="width:'+sz+';height:'+sz+';border-radius:50%;border:2px solid ' + bdr
-          + ';background:' + bg + ';' + shd + 'cursor:pointer;flex-shrink:0;transition:all .15s"'
-          + ' onclick="' + fn + '" title="' + NNOME[v] + '"></div>';
+          + ';background:' + bg + ';' + shd + opa + 'cursor:' + cur2 + ';flex-shrink:0;transition:all .15s"'
+          + (fn ? ' onclick="' + fn + '"' : '')
+          + ' title="' + (bloq ? 'Cedo para avaliar (menos de 100 dias)' : NNOME[v]) + '"></div>';
   }
   html += '</div>';
   var cor = NCOR[cur];
-  html += '<div style="font-size:11px;font-weight:700;color:' + cor + ';min-width:100px">' + NNOME[cur] + '</div>';
+  html += '<div style="font-size:11px;font-weight:700;color:' + cor + ';min-width:120px">' + NNOME[cur] + (cedo ? ' 🔒' : '') + '</div>';
   return html;
 }
 
