@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field LH — Avaliação de Talentos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--y:#FFE600;--n:#333399;--w:#fff;--bg:#F5F4F0;--gl:#F1EFE8;--bd:#E0DED6;--tp:#1a1a1a;--ts:#5F5E5A;--th:#888780;--gr:#4CAF50;--rd:#E53935;--am:#FF9800;--rm:8px;--rl:12px;--rx:16px;--sh:0 2px 12px rgba(0,0,0,.07)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tp);font-size:14px;min-height:100vh}
+*{font-family:inherit;font-size:inherit}
+input,select,textarea{padding:9px 12px;border:1.5px solid var(--bd);border-radius:var(--rm);background:var(--w);color:var(--tp);width:100%;transition:border-color .15s;outline:none;font-size:13px}
+input:focus,select:focus,textarea:focus{border-color:var(--n);box-shadow:0 0 0 3px rgba(51,51,153,.08)}
+textarea{resize:vertical;min-height:70px}
+button{cursor:pointer;border:none;background:none;font-size:13px}
+select option{background:var(--w)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--rm);font-weight:600;font-size:13px;cursor:pointer;border:none;transition:all .15s}
+.btn-y{background:var(--y);color:var(--n)}.btn-y:hover{filter:brightness(.96)}
+.btn-n{background:var(--n);color:var(--w)}.btn-n:hover{filter:brightness(1.1)}
+.btn-o{background:var(--w);border:1.5px solid var(--bd);color:var(--ts)}.btn-o:hover{background:var(--gl)}
+.btn-g{background:#E8F5E9;border:1.5px solid #A5D6A7;color:#2E7D32;cursor:pointer}
+.btn-r{background:#FFEBEE;border:1.5px solid #EF9A9A;color:#C62828;cursor:pointer}
+.btn-sm{padding:5px 11px;border-radius:20px;border:1.5px solid var(--bd);background:var(--w);color:var(--ts);font-size:12px;cursor:pointer}
+.btn-full{width:100%;justify-content:center;padding:11px}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.b-y{background:var(--y);color:var(--n)}.b-n{background:#EEEDFE;color:#3C3489}
+.b-g{background:#E8F5E9;color:#2E7D32}.b-r{background:#FFEBEE;color:#C62828}
+.b-a{background:#FFF3E0;color:#E65100}.b-gr{background:var(--gl);color:var(--ts)}
+.b-jr{background:#E3F2FD;color:#1565C0}.b-ssr{background:#F3E5F5;color:#6A1B9A}
+/* ALERTS */
+.alert{border-radius:var(--rm);padding:10px 14px;font-size:12px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:8px;line-height:1.5;border:1px solid}
+.alert i{flex-shrink:0;margin-top:1px}
+.alert-y{background:#FFF8E1;border-color:#FFD54F;color:#E65100}
+.alert-r{background:#FFEBEE;border-color:#EF9A9A;color:#C62828}
+.alert-g{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
+.alert-n{background:#EEEDFE;border-color:#C5C3E8;color:#3C3489}
+/* CARD */
+.card{background:var(--w);border:1px solid var(--bd);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--sh)}
+.ct{font-size:14px;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:8px;color:var(--tp)}
+.ct i{color:var(--n);font-size:15px}
+/* LAYOUT */
+.topbar{background:var(--w);border-bottom:1px solid var(--bd);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--sh)}
+.logo{width:34px;height:34px;background:var(--y);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo i{font-size:16px;color:var(--n)}
+.user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--gl);border-radius:20px;font-size:12px;font-weight:500}
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.av-sm{width:24px;height:24px;font-size:9px;background:var(--y);color:var(--n)}
+.av-md{width:32px;height:32px;font-size:12px;background:var(--y);color:var(--n)}
+.av-ger{background:var(--n)!important;color:var(--w)!important}
+.main-wrap{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:200px;background:var(--w);border-right:1px solid var(--bd);padding:.75rem 0;flex-shrink:0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.sb-lbl{font-size:10px;font-weight:700;color:var(--th);text-transform:uppercase;letter-spacing:.06em;padding:0 1rem;margin:.75rem 0 .3rem}
+.sb-item{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:1px .5rem;border-radius:var(--rm);cursor:pointer;font-size:12px;color:var(--ts);font-weight:500}
+.sb-item:hover{background:var(--gl);color:var(--tp)}
+.sb-item.on{background:var(--y);color:var(--n);font-weight:700}
+.sb-item.on-ger{background:var(--n);color:var(--w);font-weight:700}
+.sb-item i{width:15px;text-align:center;font-size:13px}
+.page-area{flex:1;padding:1.5rem;overflow:auto}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+/* METRIC */
+.metric{background:var(--w);border:1px solid var(--bd);border-radius:var(--rl);padding:1rem;text-align:center;box-shadow:var(--sh)}
+.mv{font-size:24px;font-weight:700;line-height:1.1}
+.ml{font-size:11px;color:var(--ts);margin-top:3px;font-weight:500}
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{text-align:left;padding:8px 10px;font-size:10px;font-weight:700;color:var(--th);border-bottom:1px solid var(--bd);text-transform:uppercase;letter-spacing:.05em;background:#FAFAF8}
+.tbl td{padding:9px 10px;border-bottom:1px solid #F0EFE8;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:#FAFAF8}
+/* FORM */
+.lbl{font-size:11px;font-weight:700;color:var(--ts);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.04em}
+/* PAGE HEADER */
+.ph{margin-bottom:1.5rem}
+.pt{font-size:20px;font-weight:700;margin-bottom:4px}
+.pd{font-size:13px;color:var(--ts)}
+/* PROGRESS */
+.pb{height:8px;background:#EEEDE8;border-radius:4px;overflow:hidden}
+.pf{height:100%;border-radius:4px;transition:width .5s}
+/* SKILL DOTS */
+.dots{display:flex;gap:4px;align-items:center}
+.dot{width:16px;height:16px;border-radius:50%;border:1.5px solid #DDD;background:#F5F4F0;cursor:pointer;transition:all .15s;flex-shrink:0}
+.dot:hover{transform:scale(1.15)}
+.dot.d0{background:#9E9E9E;border-color:#757575}
+.dot.d1{background:#66BB6A;border-color:#43A047}
+.dot.d2{background:#FFD600;border-color:#F9A825}
+.dot.d3{background:#FF7043;border-color:#E64A19}
+.dot.d4{background:#5C6BC0;border-color:#3949AB}
+.dot-lbl{font-size:10px;color:var(--ts);min-width:72px}
+.sr{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F5F4F0}
+.sr:last-child{border-bottom:none}
+.sn{flex:1;font-size:12px;font-weight:500}
+.st{font-size:10px;color:var(--th);min-width:90px}
+.sp{font-size:10px;padding:2px 6px;border-radius:10px;font-weight:700;flex-shrink:0}
+.p5{background:#FFEBEE;color:#C62828}.p4{background:#FFF3E0;color:#E65100}.p3{background:var(--gl);color:var(--ts)}
+/* PRES */
+.pres-blk{background:linear-gradient(135deg,#F8F7FF,#F0F0FA);border:1px solid #C5C3E8;border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.pres-tt{font-size:13px;font-weight:700;color:var(--n);margin-bottom:.75rem;display:flex;align-items:center;gap:7px}
+/* KPI */
+.kpi-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F5F4F0}
+.kpi-row:last-child{border-bottom:none}
+.kpi-n{flex:1;font-size:12px;font-weight:500}
+.scope{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;flex-shrink:0}
+.sc-r{background:#E3F2FD;color:#1565C0}.sc-m{background:#F3E5F5;color:#6A1B9A}
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-box{background:var(--w);border-radius:var(--rx);padding:2rem;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:.5rem}
+.modal-desc{font-size:13px;color:var(--ts);margin-bottom:1.5rem;line-height:1.6}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+/* TURNOVER */
+.to-opt{flex:1;padding:7px;border:1.5px solid var(--bd);border-radius:var(--rm);background:var(--w);font-size:11px;cursor:pointer;text-align:center;font-weight:600}
+.to-low{background:#E8F5E9;border-color:#A5D6A7;color:#2E7D32}
+.to-med{background:#FFF3E0;border-color:#FFCC80;color:#E65100}
+.to-high{background:#FFEBEE;border-color:#EF9A9A;color:#C62828}
+/* 4BOX */
+.box-cell{border-radius:var(--rl);padding:12px;min-height:90px;border:1px solid rgba(0,0,0,.06)}
+.bc-t{font-size:9px;font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--w);border:1px solid var(--bd);border-radius:20px;padding:3px 8px;font-size:10px;cursor:pointer;margin:2px;font-weight:500}
+.chip:hover{border-color:var(--n)}
+/* PCARD */
+.pcard{display:flex;align-items:center;gap:9px;padding:9px 12px;background:var(--w);border:1.5px solid var(--bd);border-radius:var(--rm);cursor:pointer;margin-bottom:4px;transition:all .12s}
+.pcard:hover,.pcard.on{border-color:var(--n);background:#F8F8FF}
+/* PDCA */
+.pdca-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.pdca-card{border-radius:var(--rm);padding:1rem;border:1px solid}
+/* CAL BAR */
+.cal-bar{display:flex;height:30px;border-radius:var(--rm);overflow:hidden;gap:2px;margin:.5rem 0}
+.cal-seg{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border-radius:5px}
+/* MISC */
+.tag{display:inline-flex;padding:3px 9px;background:var(--gl);border-radius:20px;font-size:11px;color:var(--ts);margin:2px;border:1px solid var(--bd)}
+.add-btn{display:flex;align-items:center;gap:6px;padding:9px;border:1.5px dashed #CCC;border-radius:var(--rm);background:var(--w);color:var(--th);cursor:pointer;width:100%;justify-content:center;margin-top:.5rem;font-size:12px;font-weight:500}
+.add-btn:hover{border-color:var(--n);color:var(--n)}
+.ger-banner{background:linear-gradient(135deg,var(--n),#1a1a6e);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem;color:var(--w);display:flex;align-items:center;gap:12px}
+.ger-banner i{font-size:22px;color:var(--y)}
+/* SURVEY */
+.sq{padding:10px 0;border-bottom:1px solid #F5F4F0}
+.sq:last-child{border-bottom:none}
+.sq-t{font-size:13px;margin-bottom:8px;line-height:1.5;font-weight:500}
+.sq-s{display:flex;gap:4px}
+.sq-b{flex:1;padding:7px 4px;border:1.5px solid var(--bd);border-radius:var(--rm);background:var(--w);font-size:11px;color:var(--ts);text-align:center;cursor:pointer;font-weight:600;transition:all .12s}
+.sq-b:hover{border-color:var(--n);color:var(--n)}
+.sq-b.on{background:var(--y);border-color:#E6C800;color:var(--n)}
+/* RECADO */
+.recado-item{background:var(--gl);border-radius:var(--rm);padding:1rem;margin-bottom:.75rem;border:1px solid var(--bd)}
+.recado-resp{background:var(--w);border-radius:var(--rm);padding:.75rem;margin-top:.75rem;border-left:3px solid var(--y)}
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;background:linear-gradient(135deg,#F8F7F0,#F0EFE8)}
+.login-box{background:var(--w);border:1px solid var(--bd);border-radius:var(--rx);padding:2rem;width:100%;max-width:400px;box-shadow:var(--sh)}
+.login-logo{width:56px;height:56px;background:var(--y);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.login-logo i{font-size:24px;color:var(--n)}
+.tabs{display:flex;gap:5px;background:var(--gl);padding:4px;border-radius:var(--rm);margin-bottom:1.5rem}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:6px;background:transparent;font-size:13px;cursor:pointer;color:var(--ts);font-weight:500;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s}
+.tab-btn.on{background:var(--w);color:var(--n);box-shadow:0 1px 4px rgba(0,0,0,.1);font-weight:700}
+/* LOADING */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:28px;height:28px;border:3px solid #eee;border-top-color:var(--n);border-radius:50%;animation:spin .7s linear infinite}
+@media(max-width:700px){.g2,.g3,.g4,.g5,.fr{grid-template-columns:1fr}.sidebar{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN PAGE
+     Estrutura estática completa — JS só mostra/esconde divs
+     ============================================================ -->
+<div id="PAGE-LOGIN" class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo"><i class="fas fa-truck"></i></div>
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:20px;font-weight:700">Field LH</div>
+      <div style="font-size:13px;color:var(--ts)">Avaliação de Talentos · Mercado Livre</div>
+    </div>
+
+    <!-- ABAS -->
+    <div class="tabs">
+      <button class="tab-btn" id="tab-ger"><i class="fas fa-sitemap"></i> Gerência</button>
+      <button class="tab-btn on" id="tab-ges"><i class="fas fa-user-tie"></i> Gestor</button>
+      <button class="tab-btn" id="tab-ana"><i class="fas fa-user"></i> Analista</button>
+    </div>
+
+    <!-- FORM GERENTE -->
+    <div id="form-ger">
+      <div style="margin-bottom:.75rem">
+        <label class="lbl">Nome</label>
+        <input id="ger-nome" placeholder="Diego Borges" autocomplete="name">
+      </div>
+      <div style="margin-bottom:1rem">
+        <label class="lbl">Senha</label>
+        <input type="password" id="ger-pwd" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div id="ger-err" class="alert alert-r" style="display:none">
+        <i class="fas fa-exclamation-circle"></i><span id="ger-err-msg"></span>
+      </div>
+      <button class="btn btn-n btn-full" id="btn-ger-entrar">
+        <i class="fas fa-sign-in-alt"></i> Entrar
+      </button>
+    </div>
+
+    <!-- FORM GESTOR -->
+    <div id="form-ges" style="display:none">
+      <!-- Step 1: Nome -->
+      <div id="ges-s1">
+        <div style="margin-bottom:.75rem">
+          <label class="lbl">Seu nome completo</label>
+          <input id="ges-nome" placeholder="Ex: Danilo" autocomplete="name">
+        </div>
+        <div id="ges-err" class="alert alert-r" style="display:none">
+          <i class="fas fa-exclamation-circle"></i><span id="ges-err-msg"></span>
+        </div>
+        <button class="btn btn-y btn-full" id="btn-ges-nome">
+          <i class="fas fa-arrow-right"></i> Continuar
+        </button>
+        <div style="margin-top:1rem;padding:.75rem;background:var(--gl);border-radius:var(--rm);font-size:11px;color:var(--ts)">
+          <i class="fas fa-info-circle" style="color:var(--n)"></i>
+          Use o nome completo cadastrado pelo gerente. No primeiro acesso você criará sua senha.
+        </div>
+      </div>
+      <!-- Step 2: Criar senha (1º acesso) -->
+      <div id="ges-s2" style="display:none">
+        <div class="alert alert-n" style="margin-bottom:1rem">
+          <i class="fas fa-key"></i>
+          <div>Olá, <strong id="ges-s2-nome"></strong>!<br>Crie sua senha de acesso.</div>
+        </div>
+        <div style="margin-bottom:.75rem">
+          <label class="lbl">Matrícula</label>
+          <input id="ges-mat" placeholder="Ex: ML001" autocomplete="off" style="text-transform:uppercase">
+        </div>
+        <div style="margin-bottom:.75rem">
+          <label class="lbl">Nova senha (mín. 6 caracteres)</label>
+          <input type="password" id="ges-ns1" placeholder="Nova senha" autocomplete="new-password">
+        </div>
+        <div style="margin-bottom:1rem">
+          <label class="lbl">Confirmar senha</label>
+          <input type="password" id="ges-ns2" placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+        <div id="ges-s2-err" class="alert alert-r" style="display:none">
+          <i class="fas fa-exclamation-circle"></i><span id="ges-s2-msg"></span>
+        </div>
+        <button class="btn btn-y btn-full" id="btn-ges-criar">
+          <i class="fas fa-check"></i> Criar senha e entrar
+        </button>
+        <button class="btn btn-o btn-full" id="btn-ges-back1" style="margin-top:.4rem">← Voltar</button>
+      </div>
+      <!-- Step 3: Login normal (matrícula + senha) -->
+      <div id="ges-s3" style="display:none">
+        <div style="margin-bottom:.75rem">
+          <label class="lbl">Matrícula</label>
+          <input id="ges-login-mat" placeholder="Ex: ML001" autocomplete="username" style="text-transform:uppercase">
+        </div>
+        <div style="margin-bottom:1rem">
+          <label class="lbl">Senha</label>
+          <input type="password" id="ges-login-pwd" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div id="ges-s3-err" class="alert alert-r" style="display:none">
+          <i class="fas fa-exclamation-circle"></i><span id="ges-s3-msg"></span>
+        </div>
+        <button class="btn btn-y btn-full" id="btn-ges-login">
+          <i class="fas fa-sign-in-alt"></i> Entrar
+        </button>
+        <button class="btn btn-o btn-full" id="btn-ges-back2" style="margin-top:.4rem">← Entrar pelo nome</button>
+      </div>
+    </div>
+
+    <!-- FORM ANALISTA -->
+    <div id="form-ana" style="display:none">
+      <!-- Step 1: Matrícula -->
+      <div id="ana-s1">
+        <div style="margin-bottom:.75rem">
+          <label class="lbl">Matrícula</label>
+          <input id="ana-mat" placeholder="Ex: ML050" autocomplete="username" style="text-transform:uppercase">
+        </div>
+        <div id="ana-err" class="alert alert-r" style="display:none">
+          <i class="fas fa-exclamation-circle"></i><span id="ana-err-msg"></span>
+        </div>
+        <button class="btn btn-y btn-full" id="btn-ana-mat">
+          <i class="fas fa-arrow-right"></i> Continuar
+        </button>
+        <div style="margin-top:1rem;padding:.75rem;background:var(--gl);border-radius:var(--rm);font-size:11px;color:var(--ts)">
+          <i class="fas fa-info-circle" style="color:var(--n)"></i>
+          Use a matrícula cadastrada pelo seu gestor.
+        </div>
+      </div>
+      <!-- Step 2: Criar senha (1º acesso) -->
+      <div id="ana-s2" style="display:none">
+        <div class="alert alert-n" style="margin-bottom:1rem">
+          <i class="fas fa-key"></i>
+          <div>Olá, <strong id="ana-s2-nome"></strong>!<br>Crie sua senha de acesso.</div>
+        </div>
+        <div style="margin-bottom:.75rem">
+          <label class="lbl">Nova senha (mín. 6 caracteres)</label>
+          <input type="password" id="ana-ns1" placeholder="Nova senha" autocomplete="new-password">
+        </div>
+        <div style="margin-bottom:1rem">
+          <label class="lbl">Confirmar senha</label>
+          <input type="password" id="ana-ns2" placeholder="Repita a senha" autocomplete="new-password">
+        </div>
+        <div id="ana-s2-err" class="alert alert-r" style="display:none">
+          <i class="fas fa-exclamation-circle"></i><span id="ana-s2-msg"></span>
+        </div>
+        <button class="btn btn-y btn-full" id="btn-ana-criar">
+          <i class="fas fa-check"></i> Criar senha e entrar
+        </button>
+        <button class="btn btn-o btn-full" id="btn-ana-back" style="margin-top:.4rem">← Voltar</button>
+      </div>
+      <!-- Step 3: Senha normal -->
+      <div id="ana-s3" style="display:none">
+        <div style="font-size:13px;font-weight:600;margin-bottom:.75rem" id="ana-s3-nome"></div>
+        <div style="margin-bottom:1rem">
+          <label class="lbl">Senha</label>
+          <input type="password" id="ana-pwd" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div id="ana-s3-err" class="alert alert-r" style="display:none">
+          <i class="fas fa-exclamation-circle"></i><span id="ana-s3-msg"></span>
+        </div>
+        <button class="btn btn-y btn-full" id="btn-ana-login">
+          <i class="fas fa-sign-in-alt"></i> Entrar
+        </button>
+        <button class="btn btn-o btn-full" id="btn-ana-back3" style="margin-top:.4rem">← Voltar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APP
+     ============================================================ -->
+<div id="PAGE-APP" style="display:none">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo"><i class="fas fa-truck"></i></div>
+      <div>
+        <div style="font-size:15px;font-weight:700">Field LH</div>
+        <div style="font-size:11px;color:var(--ts)" id="tb-role">—</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="user-chip">
+        <div class="av av-sm" id="tb-av">--</div>
+        <span id="tb-nome">—</span>
+      </div>
+      <button class="btn btn-o" style="padding:6px 12px" id="btn-sair">
+        <i class="fas fa-sign-out-alt"></i> Sair
+      </button>
+    </div>
+  </div>
+  <div class="main-wrap">
+    <div class="sidebar" id="SIDEBAR"></div>
+    <div class="page-area" id="PAGE-CONTENT"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="MODAL" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-desc" id="modal-desc"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="LOADING" style="display:none;position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div class="spinner"></div>
+  <div id="load-msg" style="font-size:13px;color:var(--ts)">Carregando...</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
